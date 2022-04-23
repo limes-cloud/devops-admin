@@ -40,36 +40,29 @@
         </div>
         <div class="jsonEditor">
           <div class="header">
-            <div class="header-item">
+            <div class="header-item" style="white-space: nowrap;">
               <span class="label">版本选择</span>
               <el-select size="mini" v-model="configure_id" placeholder="请选择" @change="getConfigure">
-                <el-option v-for="(item,index) in configureList" :key="index" :value="item.id" :label="version(item)">
-                </el-option>
+                <el-option v-for="(item, index) in configureList" :key="index" :value="item.id" :label="version(item)"></el-option>
               </el-select>
             </div>
-            <div class="header-item" v-permission="'configure:configure:add'">
-              <el-button @click="submit" type="primary" size="mini">保存修改</el-button>
-            </div>
-            <div class="header-item" v-permission="'configure:configure:update'">
-              <el-button @click="updateConfigure" type="primary" size="mini">使用模板</el-button>
-            </div>
-            <div class="header-item" v-permission="'configure:configure:parse'">
-              <el-button @click="lookConfig" type="success" size="mini">查看配置</el-button>
-            </div>
+            <div class="header-item" v-permission="'configure:configure:add'"><el-button @click="submit" type="primary" size="mini">保存修改</el-button></div>
+            <div class="header-item" v-permission="'configure:configure:update'"><el-button @click="updateConfigure" type="primary" size="mini">使用模板</el-button></div>
+            <div class="header-item" v-permission="'configure:configure:parse'"><el-button @click="lookConfig" type="success" size="mini">查看配置</el-button></div>
           </div>
-          <vueJsonEditor class="edit" v-model="json" :mode="'code'" lang="zh" @json-change="iserror = false"  @has-error="iserror = true"></vueJsonEditor>
+          <vueJsonEditor  class="edit" v-model="json" :mode="'code'" lang="zh" @json-change="iserror = false" @has-error="iserror = true"></vueJsonEditor>
         </div>
       </div>
     </el-card>
     <el-dialog fullscreen title="配置详情" :visible.sync="dialog">
       <div class="config-box">
         <el-tabs v-model="env" @tab-click="handleChooseEnv">
-            <el-tab-pane v-for="(item,index) in envs" :key="index" :label="item.name" :name="item.keyword">
-              <vueJsonEditor class="edit" v-model="sceneJson" :mode="'code'" lang="zh" @json-change="iserror = false"  @has-error="iserror = true"></vueJsonEditor>
-            </el-tab-pane>
-         </el-tabs>
+          <el-tab-pane v-for="(item, index) in envs" :key="index" :label="item.name" :name="item.keyword">
+            <vueJsonEditor  class="edit" v-model="sceneJson" :mode="'code'" lang="zh" @json-change="reviewChange"></vueJsonEditor>
+          </el-tab-pane>
+        </el-tabs>
         <div slot="footer" style="margin-top: 10px;float: right;">
-          <el-button  v-permission="'configure:configure:sync'" type="primary"  @click="syncConfigure">同步配置</el-button>
+          <el-button v-permission="'configure:configure:sync'" type="primary" @click="syncConfigure">同步配置</el-button>
         </div>
       </div>
     </el-dialog>
@@ -77,28 +70,28 @@
 </template>
 <script>
 import { allServices } from '@/api/configure/service.js';
-import { getConfigure,syncConfigure,getParseConfigure, getConfigures, addConfigure,updateConfigure } from '@/api/configure/configure.js';
+import { getConfigure, syncConfigure, getParseConfigure, getConfigures, addConfigure, updateConfigure } from '@/api/configure/configure.js';
 import vueJsonEditor from 'vue-json-editor';
 import { getEnvs } from '@/api/configure/environment.js';
 export default {
   components: { vueJsonEditor },
   data() {
     return {
-      envs:[],
-      env:{},
-      dialog:false,
-      iserror:false,
+      envs: [],
+      env: {},
+      dialog: false,
+      iserror: false,
       serviceList: [], //服务列表
       curService: {},
       form: {},
-      configure_id:null,
+      configure_id: null,
       dialog: false,
       updateEnvDialog: false,
       insertEnvDialog: false,
       loading: true,
       value: '',
       json: {},
-      sceneJson:{},
+      sceneJson: {},
       configureList: [],
       curConfigure: {},
       useConfigure: {},
@@ -107,80 +100,84 @@ export default {
       }
     };
   },
-  computed: {
-
-  },
+  computed: {},
   created() {
     this.allServices();
-    this.getEnvs()
+    this.getEnvs();
   },
   methods: {
     //同步配置信息
-    async syncConfigure(){
-      await syncConfigure({env:this.env,id:this.curConfigure.id})
-      this.$message.success("同步成功")
+    async syncConfigure() {
+      await syncConfigure({ env: this.env, id: this.curConfigure.id });
+      this.$message.success('同步成功');
     },
     submit() {
-      if(this.iserror){
+      if (this.iserror) {
         this.$message({ message: '模板格式错误，禁止提交', type: 'error' });
-        return
+        return;
       }
       this.$prompt('请输入更新备注', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消'
       }).then(({ value }) => {
-          this.insertData(value)
-      })
+        this.insertData(value);
+      });
     },
-    async lookConfig(env){
-      this.dialog = true
-      if(typeof env !="string" ){
-        this.env = this.envs[0].keyword
+    reviewChange(){
+      this.$message.error("当前是配置预览，修改并不会生效，请编辑模板进行修改")
+    },
+    async lookConfig(env) {
+      this.dialog = true;
+      if (typeof env != 'string') {
+        this.env = this.envs[0].keyword;
       }
-      let data = await getParseConfigure({env:this.env,id:this.curConfigure.id})
-      console.log(data.template)
-      this.sceneJson = JSON.parse(data.template)
+      let data = await getParseConfigure({ env: this.env, id: this.curConfigure.id });
+      console.log(data.template);
+      this.sceneJson = JSON.parse(data.template);
     },
-    updateConfigure(){
-       this.$confirm('确认要使用该模板配置吗?', '警告', {
-         confirmButtonText: '确定',
-         cancelButtonText: '取消',
-         type: 'warning'
-      }).then(()=> {
-        let params = {
-          id:this.curConfigure.id,
-          is_use:true,
-          service_name:this.curService.name,
-          service_id:this.curService.id
-        }
-        return updateConfigure(params);
-      }).then(() => {
-        getConfigures({ service_id: this.curService.id })
-        this.$message({ message: '使用成功', type: 'success' });
+    updateConfigure() {
+      this.$confirm('确认要使用该模板配置吗?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          let params = {
+            id: this.curConfigure.id,
+            is_use: true,
+            service_name: this.curService.name,
+            service_id: this.curService.id
+          };
+          return updateConfigure(params);
+        })
+        .then(async () => {
+          await this.getConfigures(this.curService.id);
+          this.getCurConfigure()
+          this.$message({ message: '使用成功', type: 'success' });
+        });
     },
-    version(item){
-      return item.version+"-"+item.operator+"-"+this.parseTime(item.created_at)
+    version(item) {
+      return item.version + '-' + item.operator + '-' + this.parseTime(item.created_at);
     },
-    insertData(desc){
+    insertData(desc) {
       let params = {
         service_id: this.curService.id,
         service_name: this.curService.name,
         template: JSON.stringify(this.json),
-        description:desc
+        description: desc
       };
 
       addConfigure(params).then(async res => {
         this.$message({ message: '新增成功', type: 'success' });
-        let conf = await getConfigures({ service_id: this.curService.id });
+        await this.getConfigures(this.curService.id);
+        this.getConfigure(this.configureList[this.configureList.length - 1].id);
       });
-
     },
     async getConfigure(id) {
-        this.curConfigure = await getConfigure({ id:id});
-        this.curConfigure.version = this.curConfigure.version.split("-")[0]
-        this.configure_id = id
-        this.json = JSON.parse(this.curConfigure.template)
+      this.curConfigure = await getConfigure({ id: id });
+      this.curConfigure.version = this.curConfigure.version.split('-')[0];
+      this.configure_id = id;
+      this.json = JSON.parse(this.curConfigure.template);
     },
     // 获取查询列表 使用异步函数处理
     async allServices() {
@@ -194,67 +191,71 @@ export default {
       // 默认情况下，读取第一个服务的配置
       const item = this.serviceList[0];
       this.value = item.name + '(' + item.keyword + ')';
-      this.curService = item
+      this.curService = item;
       //获取指定服务的全部服务列表
-      this.getConfigures(item.id)
+     await this.getConfigures(item.id);
+
+     await this.getCurConfigure();
     },
-    async getConfigures(service_id){
-      let conf = await getConfigures({ service_id:service_id});
+    async getConfigures(service_id) {
+      let conf = await getConfigures({ service_id: service_id });
       this.configureList = conf.list;
       if (!this.configureList.length) {
         this.$message({ message: '当前服务暂未添加配置', type: 'error' });
         return;
       }
+    },
+    getCurConfigure() {
       // 查询目前正在使用的版本
+      var item
       for (let i in this.configureList) {
-        var item = this.configureList[i]
-        item.version = item.version.split("-")[0]
-        if (item.is_use)
-          this.useConfigure = item;
+        item = this.configureList[i];
+        item.version = item.version.split('-')[0];
+        if (item.is_use) this.useConfigure = item;
       }
-      //查询出正在使用的或者自后一个版本的详细配置。
-      if(this.useConfigure.id){
-         this.getConfigure(this.useConfigure.id)
-      }else{
-        this.getConfigure(item.id)
+      if (this.useConfigure.id) {
+        this.getConfigure(this.useConfigure.id);
+      } else {
+        this.getConfigure(item.id);
       }
     },
     querySearchAsync(queryString, cb) {
-      let newList = []
+      let newList = [];
       for (let i in this.serviceList) {
-        let item = this.serviceList[i]
-        if(item.name.indexOf(queryString)!=-1 || item.keyword.indexOf(queryString)!=-1){
-          item['show_name'] =item.name + '(' + item.keyword + ')';
-          newList.push(item)
+        let item = this.serviceList[i];
+        if (item.name.indexOf(queryString) != -1 || item.keyword.indexOf(queryString) != -1) {
+          item['show_name'] = item.name + '(' + item.keyword + ')';
+          newList.push(item);
         }
       }
       cb(newList);
     },
     async handleSelect(item) {
-      this.curService = item
-      this.getConfigures(item.id)
+      this.curService = item;
+      this.getConfigures(item.id);
+      this.getCurConfigure();
     },
-    handleChooseEnv(e){
-      console.log(e)
+    handleChooseEnv(e) {
+      console.log(e);
     },
-    async getEnvs(){
-      const data = await getEnvs()
-      this.envs = data.list
-      if(!this.envs.length){
-        this.$message.error("请先设置环境")
+    async getEnvs() {
+      const data = await getEnvs();
+      this.envs = data.list;
+      if (!this.envs.length) {
+        this.$message.error('请先设置环境');
       }
     }
   }
 };
 </script>
 <style lang="scss" scoped="">
-  .config-box{
-    position: relative;
-    top:-30px;
-    .edit{
-      height: calc(100vh - 200px);
-    }
+.config-box {
+  position: relative;
+  top: -30px;
+  .edit {
+    height: calc(100vh - 200px);
   }
+}
 
 .custom-card {
   display: flex !important;
@@ -265,11 +266,9 @@ export default {
     margin-left: 15px;
     flex: 1;
     .edit {
-      height: calc(100vh - 120px);
+      height: calc(100vh - 160px);
     }
   }
-
-
 
   .service {
     border: 1px solid #f2f2fe;
