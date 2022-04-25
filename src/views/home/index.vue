@@ -1,6 +1,6 @@
 <template>
-  <div class="dashboard-container">
-      这是一个首页
+  <div class="container">
+
   </div>
 </template>
 
@@ -19,3 +19,11 @@ export default {
   }
 }
 </script>
+<style scoped="">
+  .container{
+    width:100%;
+    height: 100vh;
+    background: url(~@/assets/login_images/background.jpg)center center fixed no-repeat;
+    background-size: 100% 100%;
+  }
+</style>

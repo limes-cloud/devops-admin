@@ -11,7 +11,7 @@ import {
 const prefix = 'api/v1'
 // create an axios instance
 const service = axios.create({
-  baseURL: 'http://y.cn/' + prefix,
+  baseURL: 'https://devops-api.qlime.cn/' + prefix,
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000
 })

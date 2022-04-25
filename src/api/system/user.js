@@ -46,6 +46,14 @@ export function updateUser(data) {
   })
 }
 
+export function changeUserPwd(data) {
+  return request({
+    url: '/ums/user/changepwd',
+    method: 'post',
+    data
+  })
+}
+
 export function deleteUser(data) {
   return request({
     url: '/ums/user/info',
