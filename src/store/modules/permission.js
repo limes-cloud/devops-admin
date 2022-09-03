@@ -13,6 +13,7 @@ export function generaMenu(routes, data, permission) {
       component: item.component === 'Layout' ? Layout : loadView(item.component),
       hidden: item.hidden,
       children: [],
+      redirect: item.redirect,
       name: item.name,
       meta: {
         title: item.title,

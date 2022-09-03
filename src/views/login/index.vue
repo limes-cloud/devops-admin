@@ -3,20 +3,16 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
       <div class="title-container">
         <h3 class="title">运维云</h3>
-        <div class="login-type">
-          <span @click="loginType='input'" :class="loginType=='input'?'action':''">账号登陆</span>｜
-          <span @click="loginType='scan'" :class="loginType=='scan'?'action':''">扫码登陆</span>
-        </div>
       </div>
-      <el-form-item prop="username">
+      <el-form-item prop="phone">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="请输入手机/邮箱"
-          name="username"
+          ref="phone"
+          v-model="loginForm.phone"
+          placeholder="请输入手机"
+          name="phone"
           type="text"
           tabindex="1"
           autocomplete="on"
@@ -53,35 +49,17 @@
 
 <script>
 import { rsa_encode } from '@/utils/rsa'
-import { validEmail,validPhone} from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validEmail(value) && !validPhone(value)) {
-        callback(new Error('请输入合法的账户'))
-      } else {
-        callback()
-      }
-    }
-
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码必须大于6位以上'))
-      } else {
-        callback()
-      }
-    }
-
     return {
-      loginType:"input",
       loginForm: {
-        username: '',
+        phone: '',
         password: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        phone: [{ required: true, trigger: 'blur' }],
+        password: [{ required: true, trigger: 'blur'}]
       },
       passwordType: 'password',
       capsTooltip: false,
@@ -106,8 +84,8 @@ export default {
   created() {
   },
   mounted() {
-    if (this.loginForm.username === '') {
-      this.$refs.username.focus()
+    if (this.loginForm.phone === '') {
+      this.$refs.phone.focus()
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
     }
@@ -141,7 +119,7 @@ export default {
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })
-            .catch(() => {
+            .catch(res => {
               this.loading = false
             })
         }
@@ -229,8 +207,8 @@ $light_gray:#eee;
   overflow: hidden;
   background: url(~@/assets/login_images/background.jpg) center center fixed no-repeat;
   background-size: cover;
-
   .login-form {
+    border-radius: 4px;
     position: relative;
     top:160px;
     width: 320px;

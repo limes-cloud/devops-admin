@@ -18,20 +18,21 @@ router.beforeEach(async(to, from, next) => {
   document.title = getPageTitle(to.meta.title)
 
   // determine whether the user has logged in
-  const hasToken = getToken()
+  const hasToken = getToken().token
   if (hasToken) {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
       next({ path: '/' })
       NProgress.done() // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
     } else {
-      const hasRole = store.getters.role_name
-      if (hasRole) {
+      const hasUser = store.getters.userInfo.id
+      if (hasUser) {
         next()
       } else {
         try {
           await store.dispatch('user/getInfo')
           const asyncRoutes = await store.dispatch('permission/generateRoutes')
+          console.log(asyncRoutes)
           router.addRoutes(asyncRoutes)
           next({ ...to, replace: true })
         } catch (error) {

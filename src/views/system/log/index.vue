@@ -2,7 +2,7 @@
   <div>
     <el-card class="box-card" v-permission="'system:log:page'">
       <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-        <el-form-item label="登陆账号"><el-input v-model="queryParams.name" placeholder="请输入人员名称" clearable size="small" @keyup.enter.native="handleQuery" /></el-form-item>
+        <el-form-item label="登陆账号"><el-input v-model="queryParams.name" placeholder="请输入登陆账号" clearable size="small" @keyup.enter.native="handleQuery" /></el-form-item>
         <el-form-item label="登陆时间">
           <el-date-picker size="small" value-format="timestamp" :clearable="false" @change="chooseTime" v-model="startandend" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
         </el-form-item>
@@ -13,8 +13,8 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+          <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
       <el-table v-loading="loading" :data="List" >

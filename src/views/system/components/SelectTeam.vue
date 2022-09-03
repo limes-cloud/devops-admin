@@ -17,22 +17,9 @@
     <el-dialog title="选择部门" :visible.sync="dialogVisible" width="425px" :append-to-body="true">
       <div class="flex" style="	margin-top: 20px;">
         <div class="label">选择部门：</div>
-        <div class="team-box">
-          <el-tree
-            ref="team"
-            :default-checked-keys="keys"
-            node-key="id"
-            :data="team"
-            show-checkbox
-            :filter-node-method="filterTeam"
-            :check-strictly="false"
-            :props="{ label: 'name' }"
-          />
-        </div>
+        <div class="team-box"><el-tree ref="team" node-key="id" :data="team" show-checkbox :check-strictly="false" :props="{ label: 'name' }" /></div>
       </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="getCheckedKeys">确 定</el-button>
-      </span>
+      <span slot="footer" class="dialog-footer"><el-button type="primary" @click="getCheckedKeys">确 定</el-button></span>
     </el-dialog>
   </div>
 </template>
@@ -42,23 +29,23 @@ export default {
   props: {
     team: {
       type: Array,
-      default:[]
+      default: []
     },
     keys: {
       type: Array,
-      default:[]
+      default: []
     },
     size: {
       type: String,
       default: 'medium'
     }
   },
-  watch:{
-    keys:{
+  watch: {
+    keys: {
       immediate: true,
-      deep:true,
-      handler(val,old){
-        this.chooseKeys = val
+      deep: true,
+      handler(val, old) {
+        this.chooseKeys = val;
       }
     }
   },
@@ -74,39 +61,25 @@ export default {
     // console.log(this.k)
   },
   methods: {
+    setCheckedKeys() {
+      if (this.team.length > 0) {
+        let ids = this.getTreeIds(this.team[0]);
+        for (let i in ids) {
+          let id = ids[i];
+          this.$refs.team.setChecked(id, this.chooseKeys.indexOf(id) != -1);
+        }
+      }
+    },
     chooseTeam() {
       this.dialogVisible = true;
-      setTimeout(()=>{
-        this.$refs.team.setCheckedKeys(this.chooseKeys)
-      },1000)
-    },
-    filterTeam(param, data) {
-      return true;
+      this.$nextTick(() => {
+        this.setCheckedKeys()
+      });
     },
     getCheckedKeys() {
-      // 获取所有部门树下的数据
-      var node = this.$refs.team.getNode(1);
-      this.chooseKeys= this.breadthSearch(node)
-
-      this.$emit("confirm",this.chooseKeys)
-      this.dialogVisible = false
-    },
-    breadthSearch(item){
-        const nodeList=[item]
-        const chooseKeys = []
-        let index=0;
-        while (index<nodeList.length){
-            const node= nodeList[index++];
-            if(node.checked){
-              chooseKeys.push(node.data.id)
-            }
-            if(node.children && !node.checked){
-                for(let k in node.children){
-                    nodeList.push(node[childProp][k]);
-                }
-            }
-        }
-        return chooseKeys;
+      const checkedKeys= this.$refs.team.getCheckedKeys();
+      this.$emit('confirm', checkedKeys);
+      this.dialogVisible = false;
     }
   }
 };

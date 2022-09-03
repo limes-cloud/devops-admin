@@ -8,9 +8,17 @@ export function login(data) {
   })
 }
 
+export function refreshToken(data) {
+  return request({
+    url: '/ums/token/refresh',
+    method: 'post',
+    data
+  })
+}
+
 export function getInfo(token) {
   return request({
-    url: '/ums/user/info',
+    url: '/ums/user',
     method: 'get'
   })
 }
@@ -32,7 +40,7 @@ export function getUsers(params) {
 
 export function addUser(data) {
   return request({
-    url: '/ums/user/info',
+    url: '/ums/user',
     method: 'post',
     data
   })
@@ -40,7 +48,7 @@ export function addUser(data) {
 
 export function updateUser(data) {
   return request({
-    url: '/ums/user/info',
+    url: '/ums/user',
     method: 'put',
     data
   })
@@ -56,7 +64,7 @@ export function changeUserPwd(data) {
 
 export function deleteUser(data) {
   return request({
-    url: '/ums/user/info',
+    url: '/ums/user',
     method: 'delete',
     data
   })

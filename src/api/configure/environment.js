@@ -2,15 +2,15 @@ import request from '@/utils/request'
 
 export function getEnvs(params) {
   return request({
-    url: 'cms/environment/list',
+    url: 'configure/environments',
     method: 'get',
     params
   })
 }
-
+ 
 export function addEnv(data) {
   return request({
-    url: 'cms/environment/info',
+    url: 'configure/environment',
     method: 'post',
     data
   })
@@ -18,7 +18,7 @@ export function addEnv(data) {
 
 export function updateEnv(data) {
   return request({
-    url: 'cms/environment/info',
+    url: 'configure/environment',
     method: 'put',
     data
   })
@@ -26,8 +26,16 @@ export function updateEnv(data) {
 
 export function deleteEnv(data) {
   return request({
-    url: 'cms/environment/info',
+    url: 'configure/environment',
     method: 'delete',
+    data
+  })
+}
+
+export function ConnectEnv(data) {
+  return request({
+    url: 'configure/environment/connect',
+    method: 'post',
     data
   })
 }

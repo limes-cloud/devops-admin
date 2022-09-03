@@ -33,19 +33,7 @@ import Layout from '@/layout'
  * all roles can be accessed
  */
 export const constantRoutes = [
-  // {
-  //   path: '/',
-  //   component: Layout,
-  //   redirect: '/home',
-  //   children: [
-  //     {
-  //       path: 'home',
-  //       component: () => import('@/views/home/index'),
-  //       name: 'Home',
-  //       meta: { title: '首页', icon: 'dashboard', affix: true }
-  //     }
-  //   ]
-  // },
+
   {
     path: '/login',
     component: () => import('@/views/login/index'),
@@ -58,39 +46,7 @@ export const constantRoutes = [
   }
 ]
 
-export const asyncRoutes = [
-  // {
-  //   path: '/system',
-  //   component: Layout,
-  //   name: 'System',
-  //   meta: { title: '用户中心', icon: 'el-icon-s-help' },
-  //   children: [
-  //     {
-  //       path: 'role',
-  //       name: 'Role',
-  //       component: () => import('@/views/system/role/index'),
-  //       meta: { title: '角色管理', icon: 'table' }
-  //     }, {
-  //       path: 'menu',
-  //       name: 'Menu',
-  //       component: () => import('@/views/system/menu/index'),
-  //       meta: { title: '菜单管理', icon: 'tree' }
-  //     },
-  //     {
-  //       path: 'user',
-  //       name: 'User',
-  //       component: () => import('@/views/system/user/index'),
-  //       meta: { title: '人员管理', icon: 'table' }
-  //     },
-  //     {
-  //       path: 'team',
-  //       name: 'Team',
-  //       component: () => import('@/views/system/team/index'),
-  //       meta: { title: '部门管理', icon: 'el-icon-menu' }
-  //     }
-  //   ]
-  // }
-]
+export const asyncRoutes = []
 
 export const endRouter = [
   { path: '*', redirect: '/404', hidden: true }

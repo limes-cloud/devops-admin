@@ -1,17 +1,16 @@
 import request from '@/utils/request'
 
-export function dataScope() {
-  return {
-    'TEAMALL': '全部数据权限',
-    'TEAMDOWN': '本部门以下权限',
-    'CURTEAM': '本部门数据权限',
-    'CUSTOM': '自定义数据权限'
-  }
+export function dataScope(params) {
+  return request({
+    url: '/ums/role/data_scope',
+    method: 'get',
+    params
+  })
 }
 
 export function getRoles(params) {
   return request({
-    url: '/ums/role/list',
+    url: '/ums/role',
     method: 'get',
     params
   })
@@ -19,7 +18,7 @@ export function getRoles(params) {
 
 export function addRole(data) {
   return request({
-    url: '/ums/role/info',
+    url: '/ums/role',
     method: 'post',
     data
   })
@@ -27,7 +26,7 @@ export function addRole(data) {
 
 export function updateRole(data) {
   return request({
-    url: '/ums/role/info',
+    url: '/ums/role',
     method: 'put',
     data
   })
@@ -35,7 +34,7 @@ export function updateRole(data) {
 
 export function deleteRole(data) {
   return request({
-    url: '/ums/role/info',
+    url: '/ums/role',
     method: 'delete',
     data
   })
@@ -59,7 +58,7 @@ export function getRoleMenuIds(params) {
 
 export function getRoleMenu(params) {
   return request({
-    url: '/ums/role/menus',
+    url: '/ums/role/menu',
     method: 'get',
     params
   })

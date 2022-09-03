@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card class="box-card" v-permission="'system:team:list'">
+    <el-card class="box-card">
       <el-table v-loading="loading" :data="List" default-expand-all row-key="id" :expand-row-keys="[1]" :tree-props="{ children: 'children' }">
         <el-table-column label="部门类型" align="center" prop="name" :show-overflow-tooltip="true" />
         <el-table-column label="创建者" align="center" prop="operator" :show-overflow-tooltip="true" />
@@ -9,14 +9,11 @@
             {{ scope.row.created_at | parseTime }}
           </template>
         </el-table-column>
-        <!--<el-table-column label="人员管理" align="center" :show-overflow-tooltip="true">
+        <el-table-column label="修改时间" align="center" prop="updated_at" :show-overflow-tooltip="true" width="200px">
           <template slot-scope="scope">
-            <el-button v-permission="'system:team:add'" size="mini" type="text" icon="el-icon-s-check"
-              @click="handleTeamPerson(scope.row.team_id)">
-              管理
-            </el-button>
+            {{ scope.row.updated_at | parseTime }}
           </template>
-        </el-table-column> -->
+        </el-table-column>
         <el-table-column label="操作" align="center" width="220" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button v-permission="'system:team:add'" size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增</el-button>
@@ -50,9 +47,6 @@
         <el-button v-if="updateDialog" type="primary" @click="updateData">确 定</el-button>
       </div>
     </el-dialog>
-    <!-- <el-dialog title="部门-用户列表" :visible.sync="teamDialog" fullscreen>
-      <TeamList v-if="teamDialog" :team_id="team_id" />
-    </el-dialog> -->
   </div>
 </template>
 
@@ -84,18 +78,8 @@ export default {
       parentTitle: '',
       form: {},
       rules: {
-        name: [
-          {
-            required: true,
-            message: '部门名称不能为空'
-          }
-        ],
-        parent_id: [
-          {
-            required: true,
-            message: '部门类型不能为空'
-          }
-        ]
+        name: [{required: true, trigger: 'blur',message: '部门名称不能为空'}],
+        parent_id: [{required: true, trigger: 'blur', message: '部门类型不能为空'}]
       }
     };
   },
@@ -119,7 +103,7 @@ export default {
     },
     // 处理新增按钮点击事件
     handleAdd(row) {
-      this.form = {};
+      this.form = {"avatar":"/static/logo.png"};
       this.insertDialog = this.Dialog = true;
       this.updateDialog = false;
       this.parentTitle = row.name;
@@ -137,9 +121,7 @@ export default {
     },
     // 处理删除行事件
     handleDelete(row) {
-      this.$confirm('此操作将删除该部门, 是否继续?', '提示', {
-        type: 'warning'
-      }).then(() => {
+      this.$confirm('此操作将删除该部门, 是否继续?', '提示', {type: 'warning'}).then(() => {
         deleteTeam({ id: row.id }).then(res => {
           this.$message({ type: 'success', message:"删除部门成功"});
           this.getList();
@@ -164,6 +146,7 @@ export default {
         if (valid) {
           updateTeam(this.form).then(res => {
             this.$message({ message: '更新成功', type: 'success' });
+            this.getList();
             this.Dialog = false;
           });
         }

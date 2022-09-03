@@ -4,10 +4,11 @@
     <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
     <div class="right-menu">
       <template v-if="device !== 'mobile'">
+        <div class="right-menu-item"><i @click="drawer=true" class="setting el-icon-setting"></i></div>
         <search id="header-search" class="right-menu-item" />
         <error-log class="errLog-container right-menu-item hover-effect" />
         <screenfull id="screenfull" class="right-menu-item hover-effect" />
-        <el-tooltip content="Global Size" effect="dark" placement="bottom"><size-select id="size-select" class="right-menu-item hover-effect" /></el-tooltip>
+        <el-tooltip content="字体大小设置" effect="dark" placement="bottom"><size-select id="size-select" class="right-menu-item hover-effect" /></el-tooltip>
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
@@ -41,10 +42,15 @@
         <el-button type="primary" @click="submitChangepwd">确认修改</el-button>
       </span>
     </el-dialog>
+    <el-drawer title="页面样式设置"  :visible.sync="drawer" append-to-body>
+      <settings class="right-menu-item" />
+    </el-drawer>
   </div>
 </template>
 
 <script>
+import RightPanel from '@/components/RightPanel'
+import Settings from './Settings/index.vue'
 import { mapGetters } from 'vuex';
 import Breadcrumb from '@/components/Breadcrumb';
 import Hamburger from '@/components/Hamburger';
@@ -62,7 +68,9 @@ export default {
     ErrorLog,
     Screenfull,
     SizeSelect,
-    Search
+    Search,
+    RightPanel,
+    Settings
   },
   data(){
     var validatePass2 = (rule, value, callback) => {
@@ -76,6 +84,7 @@ export default {
     };
 
     return{
+      drawer:false,
       form:{
         pass:"",
         oldpass:"",
@@ -125,6 +134,10 @@ export default {
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
+  .setting{
+      font-size: 20px;
+      font-weight: 800;
+  }
   .hamburger-container {
     line-height: 46px;
     height: 100%;

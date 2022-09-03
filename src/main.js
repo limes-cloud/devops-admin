@@ -55,6 +55,24 @@ Vue.prototype.getTreeNode = (element, id) => { // 根据id查找节点
   return null
 }
 
+Vue.prototype.getTreeIds = (tree) => {
+  const ids = []
+  const handler = function(tree) {
+    if (tree == null) {
+      return
+    }
+    ids.push(tree.id)
+    for (const i in tree.children) {
+      handler(tree.children[i])
+    }
+  }
+  handler(tree)
+  return ids
+}
+
+// 首页
+Vue.prototype.home = 'home'
+
 Vue.config.productionTip = false
 
 new Vue({

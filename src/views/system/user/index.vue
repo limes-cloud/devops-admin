@@ -18,23 +18,24 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+          <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+        </el-form-item>
+
+        <el-form-item v-permission="'system:user:add'" >
+          <el-button type="primary" icon="el-icon-plus" size="small" @click="handleAdd">新增</el-button>
         </el-form-item>
       </el-form>
 
-      <el-row :gutter="10" class="mb8">
-        <el-col v-permission="'system:user:add'" :span="1.5"><el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button></el-col>
-      </el-row>
-      <el-table v-loading="loading" :data="List" @selection-change="handleSelectionChange">
-        <el-table-column label="姓名" width="50" align="center" prop="name" />
+      <el-table v-loading="loading" :data="List">
+        <el-table-column label="姓名" width="100" align="center" prop="name" />
         <el-table-column label="电话" align="center" prop="phone" :show-overflow-tooltip="true" />
         <el-table-column label="邮箱" align="center" prop="email" :show-overflow-tooltip="true" />
-        <el-table-column label="部门" align="center" prop="team_name" :show-overflow-tooltip="true" />
-        <el-table-column label="角色" align="center" prop="role_name" :show-overflow-tooltip="true" />
+        <el-table-column label="部门" align="center" prop="role.name" :show-overflow-tooltip="true" />
+        <el-table-column label="角色" align="center" prop="team.name" :show-overflow-tooltip="true" />
         <el-table-column label="状态" align="center" width="200px">
           <template slot-scope="scope">
-            <el-switch v-model="scope.row.status" active-text="正常" inactive-text="禁用"  @change="handleStatusChange(scope.row)" />
+            <el-switch v-model="scope.row.status" :disabled="scope.row.id===1" active-text="正常" inactive-text="禁用"  @change="handleStatusChange(scope.row)" />
           </template>
         </el-table-column>
         <el-table-column label="创建者" align="center" prop="operator" :show-overflow-tooltip="true" />
@@ -43,8 +44,11 @@
             <span>{{ scope.row.created_at | parseTime }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="角色名称" align="center" prop="role_name" :show-overflow-tooltip="true" />
-        <el-table-column label="所属部门" align="center" prop="team_name" :show-overflow-tooltip="true" />
+        <el-table-column label="修改时间" align="center" prop="created_at" :show-overflow-tooltip="true">
+          <template slot-scope="scope">
+            <span>{{ scope.row.updated_at | parseTime }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" align="center" width="220" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <div v-if="scope.row.id !== 1">
@@ -82,6 +86,14 @@
             <el-form-item label="电子邮箱" prop="email"><el-input v-model="form.email" size="medium" autocomplete="off" placeholder="请输入电子邮箱" /></el-form-item>
           </el-col>
           <el-col :span="12">
+            <el-form-item label="用户性别" prop="sex">
+              <el-radio-group v-model="form.sex">
+                <el-radio :label="true">男</el-radio>
+                <el-radio :label="false">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="所属角色" prop="role_id">
               <el-select :disabled="form.role_id == 1 && form.id == 1" v-model="form.role_id" size="medium" placeholder="请选择所属角色">
                 <el-option v-for="(item, index) in roleList" :key="index" :label="item.name" :value="item.id" />
@@ -112,22 +124,6 @@
                   clearable></el-cascader>
             </el-form-item>
           </el-col>
-<!--          <el-col  :span="24">
-            <el-form-item label="账号头像">
-              <el-upload
-                v-loading="uploading"
-                :element-loading-text="uploadtext"
-                class="avatar-uploader"
-                action="/"
-                :auto-upload="false"
-                :show-file-list="false"
-                :on-change="Upload"
-              >
-                <img v-if="form.avatar" :src="cosUrl + form.avatar" class="avatar" />
-                <i v-else class="el-icon-plus avatar-uploader-icon" />
-              </el-upload>
-            </el-form-item>
-          </el-col> -->
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -152,10 +148,7 @@ export default {
       loading: true,
       uploading: false,
       uploadtext: '',
-      btnDelete: true,
-      btnExport: true,
-      downloadLoading: false,
-      downloadAllLoading: false,
+
       queryParams: {
         page: 1,
         count: 10,
@@ -164,93 +157,43 @@ export default {
         status: undefined
       },
       List: [], // 数据信息
-      Rows: [], // 选中的行数
       total: 0, // 数据总数量
-      // 修改或删除的 弹框
       updateDialog: false,
       insertDialog: false,
       Dialog: false,
-      form: {
-        status: 1,
-        weight: 0
-      },
+      form: {},
       roleList: [],
       teamList:[],
       rules: {
-        name: [
-          {
-            required: true,
-            message: '人员名称不能为空',
-            trigger: 'blur'
-          }
-        ],
-        phone: [
-          {
-            required: true,
-            message: '联系电话不能为空',
-            trigger: 'blur'
-          }
-        ],
-        email: [
-          {
-            required: true,
-            message: '邮箱不能为空',
-            trigger: 'blur'
-          },
-          {
-            type: 'email',
-            message: '请输入正确的邮箱',
-            trigger: 'blur'
-          }
-        ],
-        role_id: [
-          {
-            required: true,
-            message: '所属角色不能为空',
-            trigger: 'blur'
-          }
-        ],
-        team_id: [
-          {
-            required: true,
-            message: '所属部门不能为空',
-            trigger: 'blur'
-          }
-        ],
-        password: [
-          {
-            required: true,
-            message: '登录密码不能为空',
-            trigger: 'blur'
-          }
-        ]
+        sex: [{required: true,message: '人员性别不能为空',trigger: 'blur'}],
+        name: [{required: true,message: '人员名称不能为空',trigger: 'blur'}],
+        phone: [{required: true,message: '联系电话不能为空',trigger: 'blur'}],
+        email: [{required: true,message: '邮箱不能为空',trigger: 'blur'},{type: 'email',message: '请输入正确的邮箱',trigger: 'blur'}],
+        role_id: [{required: true,message: '所属角色不能为空',trigger: 'blur'}],
+        team_id: [{required: true,message: '所属部门不能为空',trigger: 'blur'}],
+        password: [{required: true,message: '登录密码不能为空',trigger: 'blur'}]
       }
     };
   },
   created() {
     this.getList();
     // 初始化添加人员时 选怎角色
-    this.init()
+    this.getRolesAndTeams()
   },
   methods: {
-    init(){
-      getRoles().then(res=>{
-        this.roleList = res.list;
-      })
-      getTeams().then(res=>{
-        this.teamList = [res];
-      })
+   async getRolesAndTeams(){
+     this.roleList = await getRoles()
+     let teams = await getTeams()
+     this.teamList = [teams]
     },
     chooseTeam(e){
-      this.form.team_id = e[0]
-    },
-    handleSelect(item) {
-      this.form.team_id = item.team_id;
+      if(!e) return
+      this.form.team_id = e[e.length - 1]
     },
     // 获取查询列表 使用异步函数处理
     async getList() {
       const data = await getUsers(this.queryParams);
-      this.List = data.list;
+      this.List = data.list
       this.loading = false;
       this.total = data.total;
     },
@@ -265,8 +208,8 @@ export default {
       this.queryParams = {
         page: 1,
         count: 10,
-        role_name: undefined,
-        role_key: undefined,
+        name: undefined,
+        phone: undefined,
         status: undefined
       };
     },
@@ -283,22 +226,10 @@ export default {
       this.queryParams.page = val;
       this.getList();
     },
-    // 处理表格选中事件 rows为选中的行数据
-    handleSelectionChange(rows) {
-      this.Rows = rows;
-      this.btnDelete = false;
-      this.btnExport = false;
-      for (const i in rows) {
-        if (rows[i].user_id === 1) {
-          this.btnDelete = true;
-          break;
-        }
-      }
-    },
     // 处理switch 状态的改变
     handleStatusChange(row) {
-      const text = row.status === false ? '禁用 ' : '启用';
-      this.$confirm('确认要"' + text + '""' + row.name + '"用户吗?', '警告', {
+      const text = row.status === false ? '禁用' : '启用';
+      this.$confirm('确认要' + text + '"' + row.name + '"用户吗?', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -322,7 +253,7 @@ export default {
     },
     // 处理新增按钮点击事件
     handleAdd() {
-      this.form = { status: true, avatar:"logo.png" };
+      this.form = { status: true, avatar:"/static/logo.png" };
       this.updateDialog = false;
       this.Dialog = this.insertDialog = true;
     },
@@ -330,7 +261,7 @@ export default {
     handleUpdate(row) {
       this.Dialog = this.updateDialog = true;
       this.insertDialog = false;
-      this.form = JSON.parse(JSON.stringify(row));
+      this.form = this.deepClone(row)
     },
     insertData() {
       this.$refs.form.validate(valid => {
@@ -355,57 +286,6 @@ export default {
         }
       })
     },
-    // 对接对象存储上传头像
-    Upload(file, fileList) {
-      var this_ = this;
-      this.uploadtext = '准备上传中';
-      this.uploading = true;
-      var filename = generateName(file.name);
-      upload(
-        file.raw,
-        'avatar',
-        filename,
-        function(res) {
-          this_.uploadtext = '上传进度：' + res.percent * 100 + '%（' + res.speed + 'k/s）';
-        },
-        function(data) {
-          this_.uploading = false;
-          this_.uploadtext = '';
-          this_.form.avatar = data.Location;
-          console.log(this_.form.avatar);
-        }
-      )
-    }
-
   }
 };
 </script>
-
-<style scoped>
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.avatar-uploader .el-upload:hover {
-  border-color: #409eff;
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 120px;
-  height: 120px;
-  line-height: 120px;
-  text-align: center;
-}
-
-.avatar {
-  width: 120px;
-  height: 120px;
-  display: block;
-}
-</style>

@@ -355,3 +355,8 @@ export function removeClass(ele, cls) {
     ele.className = ele.className.replace(reg, ' ')
   }
 }
+
+export function timeUnix() {
+  const str = new Date().getTime().toString()
+  return parseInt(str.substr(0, 10))
+}

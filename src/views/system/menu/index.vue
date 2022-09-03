@@ -1,19 +1,21 @@
 <template>
   <div>
-    <el-card class="box-card" v-permission="'system:menu:list'">
-      <el-table v-loading="loading" :data="List" row-key="id" default-expand-all :tree-props="{ children: 'children' }">
-        <el-table-column label="菜单名称" align="left" prop="icon" :show-overflow-tooltip="true">
+    <el-card class="box-card" v-permission="'system:menu:tree'">
+      <!-- default-expand-all -->
+      <el-table v-loading="loading" :data="List" row-key="id"  :tree-props="{ children: 'children' }">
+        <el-table-column label="菜单名称" align="left" width="250" prop="icon" >
           <template slot-scope="scope">
             <i v-if="scope.row.icon" :class="'el-icon-' + scope.row.icon" />
             {{scope.row.title}}
           </template>
         </el-table-column>
-        <el-table-column width="180" label="权限标识" align="left" prop="permission" :show-overflow-tooltip="true" />
-        <el-table-column label="路径" align="left" prop="path" :show-overflow-tooltip="true" />
+        <el-table-column label="路径/接口" align="left" prop="path" :show-overflow-tooltip="true" />
         <el-table-column label="类型" align="left" prop="hidden" :show-overflow-tooltip="true">
           <template slot-scope="scope">
+            <el-tag effect="dark" v-if="scope.row.type === 'R'" type="primary">根菜单</el-tag>
             <el-tag effect="dark" v-if="scope.row.type === 'M'" type="primary">菜单</el-tag>
             <el-tag  effect="dark" v-if="scope.row.type === 'A'" type="warning">接口 | {{scope.row.method}}</el-tag>
+            <el-tag  effect="dark" v-if="scope.row.type === 'G'" type="success">接口组</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="是否隐藏" align="left" prop="hidden" :show-overflow-tooltip="true">
@@ -31,11 +33,13 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" align="left" width="220" class-name="small-padding fixed-width">
-          <template slot-scope="scope">
-            <el-button v-permission="'system:menu:add'" size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增</el-button>
-            <el-button v-permission="'system:menu:update'" size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
-            <el-button v-permission="'system:menu:delete'" size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
+            <template slot-scope="scope">
+              <div >
+              <el-button v-permission="'system:menu:add'" size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增</el-button>
+              <el-button v-if="scope.row.type != 'R'" v-permission="'system:menu:update'" size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
+              <el-button v-if="scope.row.type != 'R'" v-permission="'system:menu:delete'" size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
+              </div>
+            </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -65,6 +69,7 @@
               <el-radio-group v-model="form.type">
                 <el-radio label="M" value="M">菜单</el-radio>
                 <el-radio label="A" value="A">接口</el-radio>
+                <el-radio label="G" value="G">接口组</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -81,7 +86,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row v-if="form.type == 'A'">
+        <el-row v-if="form.type == 'A' || form.type == 'G'">
           <el-col :span="12">
             <el-form-item label="权限标识"><el-input v-model="form.permission" size="medium" placeholder="请权限标识" maxlength="50" /></el-form-item>
           </el-col>
@@ -124,14 +129,17 @@
           </el-col>
         </el-row>
 
-        <el-row>
-          <el-col :span="24" v-if="form.type === 'M'">
+        <el-row  v-if="form.type === 'M'">
+          <el-col :span="12">
             <el-form-item label="菜单状态">
               <el-radio-group v-model="form.hidden">
                 <el-radio :label="false">显示</el-radio>
                 <el-radio :label="true">隐藏</el-radio>
               </el-radio-group>
             </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="跳转地址" prop="redirect"><el-input v-model="form.redirect" size="medium" placeholder="请输入跳转地址" /></el-form-item>
           </el-col>
         </el-row>
       </el-form>
