@@ -123,7 +123,7 @@
 import editor from 'vue2-ace-editor';
 import ace from 'brace';
 import {getVariable} from "@/api/service/service.js"
-import { getReleases,getReleaseTypes,addRelease, updateRelease, deleteRelease, connectRelease } from '@/api/service/release.js';
+import { getReleases,getReleaseTypes,addRelease, updateRelease, deleteRelease } from '@/api/service/release.js';
 export default {
   components:{editor},
   data() {
@@ -187,7 +187,9 @@ export default {
       this.variables = await getVariable(this.queryParams);
     },
     async getList() {
-      this.list = await getReleases(this.queryParams);
+      let data = await getReleases(this.queryParams);
+      this.list = data.list 
+      this.total = data.total
       this.loading = false;
     },
     // 处理查询事件

@@ -8,6 +8,15 @@ export function getVariable(params) {
   })
 }
 
+export function getRunTypes(params) {
+  return request({
+    url: 'service/run_types',
+    method: 'get',
+    params
+  })
+}
+
+
 export function getServices(params) {
   return request({
     url: 'service/service/filter',

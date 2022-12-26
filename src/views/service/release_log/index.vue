@@ -113,9 +113,9 @@
           ></el-autocomplete>
         </el-form-item>
 
-        <el-form-item label="选择镜像" prop="image_name" >
-           <el-select v-model="form.image_name"  filterable placeholder="请选择">
-             <el-option v-for="(item,index) in images" :key="index" :label="item.image_name+'（'+parseTime(item.created_at)+'）'" :value="item.image_name" ></el-option>
+        <el-form-item label="选择镜像" prop="pack_id" >
+           <el-select v-model="form.pack_id"  filterable placeholder="请选择">
+             <el-option v-for="(item,index) in images" :key="index" :label="item.image_name+'（'+parseTime(item.created_at)+'）'" :value="item.id" ></el-option>
            </el-select>
         </el-form-item>
 
@@ -163,7 +163,7 @@ export default {
       rules: {
         service_keyword: [{ required: true, trigger: 'blur', message: '服务名称不能为空' }],
         env_keyword: [{ required: true, trigger: 'blur', message: '发布环境' }],
-        image_name: [{ required: true, trigger: 'blur', message: '发布镜像' }],
+        pack_id: [{ required: true, trigger: 'blur', message: '发布镜像' }],
       },
     }
   },

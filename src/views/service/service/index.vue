@@ -44,7 +44,6 @@
        <el-table-column label="项目名称" align="center" prop="repo" :show-overflow-tooltip="true" />
        <el-table-column label="运行端口" align="center" prop="run_port" :show-overflow-tooltip="true" />
        <el-table-column label="监听端口" align="center" prop="listen_port" :show-overflow-tooltip="true" />
-
         <el-table-column label="备注" align="center" prop="description" :show-overflow-tooltip="true" />
         <el-table-column label="创建者" align="center" prop="operator" :show-overflow-tooltip="true" />
         <el-table-column label="创建时间" align="center" :show-overflow-tooltip="true">
@@ -94,7 +93,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="docker模板" prop="dockerfile_id">
-              <el-select v-model="form.dockerfile_id" filterable remote reserve-keyword :remote-method="getDockerfiles" :loading="loading" placeholder="请选择">
+              <el-select v-model="form.dockerfile_id" filterable remote reserve-keyword :remote-method="getDockerfiles"  placeholder="请选择">
                 <el-option v-for="item in dockerfiles" :key="item.id" :label="item.name" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
@@ -115,7 +114,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="发布模板" prop="release_id">
-              <el-select v-model="form.release_id" filterable remote reserve-keyword :remote-method="getReleases" :loading="loading" placeholder="请选择">
+              <el-select v-model="form.release_id" filterable remote reserve-keyword :remote-method="getReleases"  placeholder="请选择">
                 <el-option v-for="item in releases" :key="item.id" :label="item.name" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
@@ -183,6 +182,12 @@
 
         </el-row>
 
+        <el-form-item label="运行类型" prop="run_type">
+          <el-select v-model="form.run_type"  placeholder="请选择">
+            <el-option v-for="tp in runTypes" :key="tp" :label="tp" :value="tp"></el-option>
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="所属环境" prop="env_ids">
           <el-select v-model="form.env_ids" multiple placeholder="请选择">
             <el-option v-for="item in envList" :key="item.id" :label="item.name" :value="item.id"></el-option>
@@ -220,7 +225,7 @@
 import { getReleases } from '@/api/service/release.js';
 import { getTeams } from '@/api/system/team.js';
 import { getEnvs } from '@/api/service/environment.js';
-import { getServiceInfos, addService, updateService, deleteService } from '@/api/service/service.js';
+import { getServiceInfos, addService, updateService, deleteService,getRunTypes } from '@/api/service/service.js';
 import { getImageRegistries } from '@/api/service/image_registry.js';
 import { getCodeRegistries ,getProject} from '@/api/service/code_registry.js';
 import { getDockerfiles } from '@/api/service/dockerfile.js';
@@ -236,6 +241,7 @@ export default {
       total: 0,
       dockerfiles:[],
       images:[],
+      runTypes:[],
       codes:[],
       dialog: false,
       updateServiceDialog: false,
@@ -275,19 +281,25 @@ export default {
     this.getTeams();
     this.getEnvs();
     this.getList();
+    this.getRunTypes();
   },
   methods: {
     async getReleases(name) {
       if (name !== '') {
         this.releases = []
       }
-      this.releases = await getReleases({page:1,count:10,name:name});
+      let data = await getReleases({page:1,count:10,name:name});
+      this.releases = data.list
+    },
+    async getRunTypes(){
+      this.runTypes = await getRunTypes()
     },
     async getDockerfiles(name) {
       if (name !== '') {
         this.dockerfiles = []
       }
-      this.dockerfiles = await getDockerfiles({page:1,count:10,name:name});
+      let data = await getDockerfiles({page:1,count:10,name:name});
+      this.dockerfiles = data.list 
     },
     async getCodeRegistries() {
       this.codes = await getCodeRegistries();
@@ -372,8 +384,8 @@ export default {
       this.insertServiceDialog = false;
       this.updateServiceDialog = true;
       this.form = this.deepClone(row);
-      this.dockerfiles = [{id:this.form.code_registry_id,name:this.form.code_registry_name}]
-
+      this.dockerfiles = [{id:this.form.dockerfile_id,name:this.form.dockerfile_name}]
+      this.releases = [{id:this.form.release_id,name:this.form.release_name}]
       for (let i in this.form.env_ids) {
         let id = this.form.env_ids[i];
         let hasValue = false;

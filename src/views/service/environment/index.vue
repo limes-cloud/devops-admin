@@ -7,6 +7,11 @@
       <el-table v-loading="loading" :data="list" v-permission="'service:environment:all'" >
         <el-table-column label="标志符" align="center" prop="keyword" :show-overflow-tooltip="true" />
         <el-table-column label="环境名" align="center" prop="name" :show-overflow-tooltip="true" />
+        <el-table-column label="运行模式" align="center" prop="type" :show-overflow-tooltip="true" />
+        <el-table-column label="连接地址" align="center" prop="host" :show-overflow-tooltip="true" />
+        <el-table-column label="链接token" align="center" prop="token" :show-overflow-tooltip="true" />
+        <el-table-column label="命名空间" align="center" prop="namespace" :show-overflow-tooltip="true" />
+        
         <el-table-column label="状态" align="center">
           <template slot-scope="scope">
             <el-switch v-model="scope.row.status" active-text="正常" inactive-text="禁用" @change="handleStatusChange(scope.row)" />
@@ -42,11 +47,14 @@
         <el-form-item label="环境标识" prop="keyword"><el-input v-model="form.keyword" size="medium" autocomplete="off" placeholder="请输入环境标识" /></el-form-item>
         <el-form-item label="环境名称" prop="name"><el-input v-model="form.name" size="medium" autocomplete="off" placeholder="请输入环境名称" /></el-form-item>
         <el-form-item label="环境备注" prop="description"><el-input v-model="form.description" type="textarea" /></el-form-item>
-        <el-form-item label="dc-host" prop="dc_host"><el-input v-model="form.dc_host" /></el-form-item>
-        <el-form-item label="dc-token" prop="dc_token"><el-input v-model="form.dc_token" type="textarea" /></el-form-item>
-        <el-form-item label="k8s-host" prop="k8s_host"><el-input v-model="form.k8s_host" /></el-form-item>
-        <el-form-item label="namespace" prop="k8s_namespace"><el-input v-model="form.k8s_namespace"/></el-form-item>
-        <el-form-item label="k8s-token" prop="k8s_token"><el-input v-model="form.k8s_token" type="textarea" /></el-form-item>
+        <el-form-item label="运行模式" prop="type">
+          <el-select v-model="form.type">
+            <el-option v-for="tp in types" :key="tp" :label="tp" :value="tp">{{ tp }}</el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item  label="连接地址" prop="host"><el-input v-model="form.host" /></el-form-item>
+        <el-form-item  label="连接token" prop="token"><el-input v-model="form.token" type="textarea" /></el-form-item>
+        <el-form-item v-if="form.type == 'k8s'" label="命名空间" prop="namespace"><el-input v-model="form.namespace"/></el-form-item>
         <el-form-item label="环境状态" prop="status">
           <el-radio-group v-model="form.status">
             <el-radio :label="true">正常</el-radio>
@@ -63,12 +71,14 @@
   </div>
 </template>
 <script>
+import { getReleaseTypes} from '@/api/service/release.js';
 import { getEnvs, addEnv, updateEnv, deleteEnv } from '@/api/service/environment.js';
 export default {
   data() {
     return {
       list: [], //环境列表
       form: {},
+      types:{},
       dialog: false,
       updateEnvDialog: false,
       insertEnvDialog: false,
@@ -77,7 +87,11 @@ export default {
         name: [{ required: true, trigger: 'blur', message: '环境名称不能为空' }],
         keyword: [{ required: true, trigger: 'blur', message: '环境标识不能为空' }],
         description: [{ required: true, trigger: 'blur', message: '环境描述件不能为空' }],
-        status: [{ required: true, trigger: 'blur', message: '环境状态不能为空' }]
+        status: [{ required: true, trigger: 'blur', message: '环境状态不能为空' }],
+        type: [{ required: true, trigger: 'blur', message: '运行模式不能为空' }],
+        host: [{ required: true, trigger: 'blur', message: '连接地址不能为空' }],
+        token: [{ required: true, trigger: 'blur', message: '连接token不能为空' }],
+
       },
       connectStatus:undefined
     };
@@ -85,12 +99,16 @@ export default {
   computed: {},
   created() {
     this.getEnvs();
+    this.getReleaseTypes();
   },
   methods: {
     // 获取查询列表 使用异步函数处理
     async getEnvs() {
       this.list = await getEnvs();
       this.loading = false;
+    },
+    async getReleaseTypes() {
+      this.types = await getReleaseTypes();
     },
     // 处理switch 状态的改变
     handleStatusChange(row) {

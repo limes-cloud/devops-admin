@@ -171,7 +171,9 @@ export default {
       this.variables = await getVariable(this.queryParams);
     },
     async getList() {
-      this.list = await getDockerfiles(this.queryParams);
+      let data = await getDockerfiles(this.queryParams);
+      this.list = data.list 
+      this.total = data.total
       this.loading = false;
     },
     // 处理查询事件
