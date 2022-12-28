@@ -8,7 +8,6 @@ export function getNetworks(params) {
   })
 }
 
-
 export function addNetwork(data) {
   return request({
     url: 'service/network',

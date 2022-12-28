@@ -6,7 +6,7 @@ import {
 import store from '@/store'
 import { refreshToken } from '@/api/system/user.js'
 
-const baseUrl = 'http://y.cn/'
+const baseUrl = window.SYSTEM_CONFIG.baseUrl
 // create an axios instance
 const service = axios.create({
   baseURL: baseUrl,

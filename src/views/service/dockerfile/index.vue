@@ -12,7 +12,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="list" v-permission="'service:dockerfile:all'">
+      <el-table v-loading="loading" v-permission="'service:dockerfile:all'" :data="list">
         <el-table-column label="dockerfile名称" align="center" prop="name" :show-overflow-tooltip="true" />
         <el-table-column label="dockerfile描述" align="center" prop="desc" :show-overflow-tooltip="true" />
         <el-table-column label="创建者" align="center" prop="operator" :show-overflow-tooltip="true" />
@@ -29,7 +29,7 @@
 
         <el-table-column label="操作" align="center" width="220" class-name="small-padding fixed-width">
           <template slot-scope="scope">
-            <el-button slot="reference"  size="small" type="text" icon="el-icon-tickets" @click="handleTemplate(scope.row)">查看模板</el-button>
+            <el-button slot="reference" size="small" type="text" icon="el-icon-tickets" @click="handleTemplate(scope.row)">查看模板</el-button>
             <el-button v-permission="'service:dockerfile:update'" size="small" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
             <el-button v-permission="'service:dockerfile:delete'" size="small" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
           </template>
@@ -60,23 +60,23 @@
 
         <el-form-item label="dockerfile模板" prop="template">
           <div class="codeEditBox">
-              <editor
-                class="editor"
-                v-model="form.template"
-                @input="changeTemplate"
-                @init="editorInit"
-                lang="dockerfile"
-                :options="editorOptions"
-                theme="chrome"
-                width="100%"
-              ></editor>
-            </div>
+            <editor
+              v-model="form.template"
+              class="editor"
+              lang="dockerfile"
+              :options="editorOptions"
+              theme="chrome"
+              width="100%"
+              @input="changeTemplate"
+              @init="editorInit"
+            />
+          </div>
         </el-form-item>
 
         <el-form-item v-if="templateVariable.length" label="模板变量" prop="desc">
-          <el-table  :data="templateVariable"  style="width: 100%" border>
-            <el-table-column prop="keyword"  label="变量" width="180"></el-table-column>
-            <el-table-column prop="label"  label="描述"></el-table-column>
+          <el-table :data="templateVariable" style="width: 100%" border>
+            <el-table-column prop="keyword" label="变量" width="180" />
+            <el-table-column prop="label" label="描述" />
           </el-table>
         </el-form-item>
 
@@ -86,69 +86,69 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialog = false">取 消</el-button>
-        <el-button type="primary" v-if="insertDialog" @click="insert">确 定</el-button>
-        <el-button type="primary" v-if="updateDialog" @click="update">确 定</el-button>
+        <el-button v-if="insertDialog" type="primary" @click="insert">确 定</el-button>
+        <el-button v-if="updateDialog" type="primary" @click="update">确 定</el-button>
       </div>
     </el-dialog>
 
     <el-dialog width="800px" title="dockerfile模板" :visible.sync="templateDialog">
-        <editor
-          v-model="template"
-          @init="editorInit"
-          lang="dockerfile"
-          :options="editorOptions"
-          theme="chrome"
-          width="100%"
-          height="450px"
-          aria-disabled
-        ></editor>
-        <div slot="footer" class="dialog-footer">
-          <el-button type="primary"  @click="templateDialog=false">确 定</el-button>
-        </div>
+      <editor
+        v-model="template"
+        lang="dockerfile"
+        :options="editorOptions"
+        theme="chrome"
+        width="100%"
+        height="450px"
+        aria-disabled
+        @init="editorInit"
+      />
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="templateDialog=false">确 定</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import editor from 'vue2-ace-editor';
-import ace from 'brace';
-import {getVariable} from "@/api/service/service.js"
-import { getDockerfiles,addDockerfile, updateDockerfile, deleteDockerfile, connectDockerfile } from '@/api/service/dockerfile.js';
+import editor from 'vue2-ace-editor'
+import ace from 'brace'
+import { getVariable } from '@/api/service/service.js'
+import { getDockerfiles, addDockerfile, updateDockerfile, deleteDockerfile, connectDockerfile } from '@/api/service/dockerfile.js'
 export default {
-  components:{editor},
+  components: { editor },
   data() {
     return {
-      list: [], //代码dockerfile列表
+      list: [], // 代码dockerfile列表
       form: {},
-      types:[],
-      templateDialog:false,
-      template:"",
+      types: [],
+      templateDialog: false,
+      template: '',
       dialog: false,
       updateDialog: false,
       insertDialog: false,
       loading: true,
       rules: {
         name: [{ required: true, trigger: 'blur', message: 'dockerfile名称不能为空' }],
-        template: [{ required: true, trigger: 'blur', message: 'dockerfile模板不能为空' }],
+        template: [{ required: true, trigger: 'blur', message: 'dockerfile模板不能为空' }]
       },
       editorOptions: {
         // 设置代码编辑器的样式
-        language:"dockerfile",
-        enableBasicAutocompletion: true, //启用基本自动完成
+        language: 'dockerfile',
+        enableBasicAutocompletion: true, // 启用基本自动完成
         enableSnippets: false, // 启用代码段
-        enableLiveAutocompletion: true, //启用实时自动完成
-        tabSize: 1, //标签大小
-        fontSize: 14, //设置字号
-        showPrintMargin: true, //去除编辑器里的竖线
+        enableLiveAutocompletion: true, // 启用实时自动完成
+        tabSize: 1, // 标签大小
+        fontSize: 14, // 设置字号
+        showPrintMargin: true // 去除编辑器里的竖线
       },
-      total:0,
-      queryParams:{
-        page:1,
-        count:10,
-        name:undefined,
+      total: 0,
+      queryParams: {
+        page: 1,
+        count: 10,
+        name: undefined
       },
-      templateVariable:[],
-      variables:{},
-    };
+      templateVariable: [],
+      variables: {}
+    }
   },
 
   computed: {
@@ -159,48 +159,47 @@ export default {
     this.getList()
   },
   methods: {
-     editorInit() {
-          require('brace/theme/chrome');
-          require('brace/ext/language_tools'); //language extension prerequsite...
-          require('brace/mode/dockerfile');
-          require('brace/snippets/dockerfile');
-
+    editorInit() {
+      require('brace/theme/chrome')
+      require('brace/ext/language_tools') // language extension prerequsite...
+      require('brace/mode/dockerfile')
+      require('brace/snippets/dockerfile')
     },
     // 获取查询列表 使用异步函数处理
     async getVariable() {
-      this.variables = await getVariable(this.queryParams);
+      this.variables = await getVariable(this.queryParams)
     },
     async getList() {
-      let data = await getDockerfiles(this.queryParams);
-      this.list = data.list 
+      const data = await getDockerfiles(this.queryParams)
+      this.list = data.list
       this.total = data.total
-      this.loading = false;
+      this.loading = false
     },
     // 处理查询事件
     handleQuery() {
-      this.loading = true;
-      this.queryParams.page = 1;
-      this.getList();
+      this.loading = true
+      this.queryParams.page = 1
+      this.getList()
     },
     resetQuery() {
       this.queryParams = {
         page: 1,
         count: 10,
         name: undefined
-      };
+      }
     },
     // 处理pagination 展示数量改变 val 为展示的数量
     handleSizeChange(val) {
-      this.loading = true;
-      this.queryParams.page = 1;
-      this.queryParams.count = val;
-      this.getList();
+      this.loading = true
+      this.queryParams.page = 1
+      this.queryParams.count = val
+      this.getList()
     },
     // 处理pagination 当前所在页改变 val为当前页
     handleCurrentChange(val) {
-      this.loading = true;
-      this.queryParams.page = val;
-      this.getList();
+      this.loading = true
+      this.queryParams.page = val
+      this.getList()
     },
     handleTemplate(row) {
       this.template = row.template
@@ -208,32 +207,32 @@ export default {
     },
     // 处理新增按钮点击事件
     handleAdd() {
-      this.form = { };
-      this.insertDialog = true;
-      this.updateDialog = false;
-      this.dialog = true;
+      this.form = { }
+      this.insertDialog = true
+      this.updateDialog = false
+      this.dialog = true
     },
     // 处理修改按钮点击事件
     handleUpdate(row) {
-      this.insertDialog = false;
-      this.updateDialog = true;
-      this.form = this.deepClone(row);
+      this.insertDialog = false
+      this.updateDialog = true
+      this.form = this.deepClone(row)
       this.getTemplateVariable(this.form.template)
-      this.dialog = true;
+      this.dialog = true
     },
-    changeTemplate(val){
+    changeTemplate(val) {
       this.getTemplateVariable(val)
     },
-    getTemplateVariable(text){
+    getTemplateVariable(text) {
       var reg = /\{\w+}/g
-      let list = text.match(reg);
+      const list = text.match(reg)
       this.templateVariable = []
-      let bucket = {}
-      for(let i in list){
-        let key = list[i].substr(1,list[i].length-2)
-        if(this.variables[key] && !bucket[key]){
+      const bucket = {}
+      for (const i in list) {
+        const key = list[i].substr(1, list[i].length - 2)
+        if (this.variables[key] && !bucket[key]) {
           bucket[key] = true
-          this.templateVariable.push({keyword:key,label:this.variables[key]})
+          this.templateVariable.push({ keyword: key, label: this.variables[key] })
         }
       }
     },
@@ -242,42 +241,42 @@ export default {
       this.$confirm('此操作将删除该代码dockerfile, 是否继续?', '提示', { type: 'warning' }).then(() => {
         deleteDockerfile({ id: row.id })
           .then(res => {
-            this.$message({ type: 'success', message: '删除成功!' });
-            this.getList();
+            this.$message({ type: 'success', message: '删除成功!' })
+            this.getList()
           })
           .catch(() => {
-            this.$message({ type: 'info', message: '已取消删除' });
-          });
-      });
+            this.$message({ type: 'info', message: '已取消删除' })
+          })
+      })
     },
     // 处理插入数据的
     insert() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          var params = this.deepClone(this.form);
+          var params = this.deepClone(this.form)
           addDockerfile(params).then(res => {
-            this.$message({ message: '新增成功', type: 'success' });
-            this.getList();
-            this.dialog = false;
-          });
+            this.$message({ message: '新增成功', type: 'success' })
+            this.getList()
+            this.dialog = false
+          })
         }
-      });
+      })
     },
     // 处理更新数据
     update() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          var params = this.deepClone(this.form);
+          var params = this.deepClone(this.form)
           updateDockerfile(params).then(res => {
-            this.$message({ message: '更新成功', type: 'success' });
-            this.getList();
-            this.dialog = false;
-          });
+            this.$message({ message: '更新成功', type: 'success' })
+            this.getList()
+            this.dialog = false
+          })
         }
-      });
+      })
     }
   }
-};
+}
 </script>
 <style scoped>
   .editor{
