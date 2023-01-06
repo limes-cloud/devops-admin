@@ -32,7 +32,7 @@
             {{scope.row.updated_at | parseTime}}
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="left" width="220" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="left" width="240" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <div >
               <el-button v-permission="'system:menu:add'" size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增</el-button>

@@ -33,6 +33,8 @@ service.interceptors.request.use(
 var isRefreshing = false
 // 重试队列，每一项将是一个待执行的函数形式
 var requests = []
+// 是否正在退出登陆
+var isLogouting = false
 
 // response interceptor
 service.interceptors.response.use(
@@ -43,14 +45,13 @@ service.interceptors.response.use(
     }
 
     // token过期
-    if (res.code === 403) {
+    if (res.code === 4001) {
       const config = response.config
       const info = store.getters.tokenInfo
 
       if (!isRefreshing) {
         isRefreshing = true
         return refreshToken({ token: info.refresh_token }).then(res => {
-          console.log(res)
           store.dispatch('user/refreshToken', res)
           const { token } = res
           config.headers['Authorization'] = token
@@ -75,13 +76,18 @@ service.interceptors.response.use(
     }
 
     // 处理token错误
-    if (res.code === 401) {
-      store.dispatch('user/resetToken')
-      MessageBox.confirm(res.msg, '温馨提示', {
-        type: 'warning'
-      }).then(() => {
-        location.reload()
-      })
+    if (res.code === 4000) {
+      if(!isLogouting){
+        isLogouting = true 
+        store.dispatch('user/resetToken')
+
+        MessageBox.confirm(res.msg, '温馨提示', {
+          type: 'warning'
+        }).then(() => {
+          location.reload()
+        })
+        isLogouting = false 
+      }
       return Promise.reject(new Error(res.msg || 'Error'))
     }
 
@@ -94,6 +100,7 @@ service.interceptors.response.use(
     return Promise.reject(new Error(res.msg || 'Error'))
   },
   error => {
+    console.log("error2")
     Message({
       message: error.message,
       type: 'error',

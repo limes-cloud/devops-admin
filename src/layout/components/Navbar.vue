@@ -21,11 +21,20 @@
           <!-- <router-link to="/profile/index"> -->
           <!-- <el-dropdown-item>修改密码</el-dropdown-item> -->
           <!-- </router-link> -->
+          <el-dropdown-item @click.native="handleUserinfo">个人信息</el-dropdown-item>
           <el-dropdown-item @click.native="changDialogVisible=true">修改密码</el-dropdown-item>
           <el-dropdown-item divided @click.native="logout"><span style="display:block;">退出登陆</span></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+
+    <el-dialog title="个人信息" :visible.sync="userDialogVisible" :close-on-click-modal="false"  width="400px" center>
+      <el-table  :data="userinfo"  style="width: 100%">
+        <el-table-column  prop="label" label="信息标题"  width="180"> </el-table-column>
+        <el-table-column  prop="value" label="信息值"  width="180"> </el-table-column>
+      </el-table>
+    </el-dialog>
+
     <el-dialog title="修改密码" :visible.sync="changDialogVisible" :close-on-click-modal="false"  width="300px" center>
       <el-form :model="form" status-icon :rules="rules" ref="form"  class="demo-ruleForm">
         <el-form-item label="旧密码" prop="oldpass">
@@ -59,6 +68,7 @@ import Screenfull from '@/components/Screenfull';
 import SizeSelect from '@/components/SizeSelect';
 import Search from '@/components/HeaderSearch';
 import {changeUserPwd} from "@/api/system/user.js"
+import getters from '@/store/getters';
 
 
 export default {
@@ -90,6 +100,8 @@ export default {
         oldpass:"",
         checkPass:""
       },
+      userinfo:[],
+      userDialogVisible:false,
       changDialogVisible:false,
       rules: {
         oldpass: [ {required: true,trigger: 'blur',message: '旧密码不能为空'}],
@@ -102,6 +114,15 @@ export default {
     ...mapGetters(['sidebar', 'avatar', 'device'])
   },
   methods: {
+    handleUserinfo(){
+      let userinfo = this.$store.getters.userInfo
+      console.log(userinfo)
+      this.userinfo.push({"label":"用户姓名","value":userinfo.name})
+      this.userinfo.push({"label":"用户昵称","value":userinfo.nickname})
+      this.userinfo.push({"label":"用户角色","value":userinfo.role.name})
+      this.userinfo.push({"label":"所属部门","value":userinfo.team.name})
+      this.userDialogVisible=true;
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar');
     },
